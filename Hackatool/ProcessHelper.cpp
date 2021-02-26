@@ -88,8 +88,19 @@ void ProcessHelper::printAllProcesses() {
 	std::vector<DWORD> processVec;
 	getAllRunningProcesses(processVec);
 	for (auto item : processVec) {
-		std::cout << getProcessName(item) << std::endl;
+		std::string processName = getProcessName(item);
+		if(processName != "unknown")
+			std::cout << getProcessName(item) << std::endl;
 	}
+}
+
+template<class T>
+std::vector<char> ProcessHelper::sliceData(T data)
+{
+	int size = sizeof(T);
+	std::vector<char> dataVec(size);
+	auto dataVec = reinterpret_cast<char*>(&data);
+	return std::vector<char>(dataVec, dataVec + size);
 }
 
 template <class T>
@@ -140,6 +151,25 @@ std::vector<MemoryPage> ProcessHelper::getMemoryPages(HANDLE processHandle)
 		}
 	}
 	return pageVec;
+}
+
+std::vector<char> ProcessHelper::readMemory(HANDLE processHandle, MemoryPage page)
+{
+	std::vector<char> dataVec(page.size);
+
+	LPVOID buffer = nullptr;
+	SIZE_T size;
+	if (!ReadProcessMemory(processHandle, page.baseAddress, dataVec.data(), page.size, &size))
+	{
+		std::cerr << "Can't read memory" << std::endl;
+		exit(-1);
+	}
+	
+	std::cout << "Buffer Content123: " << std::endl;
+	std::cout << "Size: " << size << std::endl;
+	std::cout << (int*)buffer << std::endl;
+	dataVec.resize(size);
+	return dataVec;
 }
 
 

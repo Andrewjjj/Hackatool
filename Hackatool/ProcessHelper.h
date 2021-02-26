@@ -13,6 +13,9 @@ struct MemoryPage {
 
 namespace ProcessHelper
 {
+	template <class T>
+	static std::vector<char> sliceData(T data);
+
 	static void getAllRunningProcesses(std::vector<DWORD> &vec);
 	static std::string getProcessName(DWORD processID);
 	static DWORD findProcessID(std::string processName);
@@ -25,6 +28,7 @@ namespace ProcessHelper
 	static DWORD getBaseAddress(HANDLE processHandle);
 
 	static std::vector<MemoryPage> getMemoryPages(HANDLE processHandle);
+	static std::vector<char> readMemory(HANDLE processHandle, MemoryPage page);
 	//ProcessHelper() {  };
 	//static std::vector<DWORD> processVec;
 };

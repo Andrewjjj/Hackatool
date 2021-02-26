@@ -3,21 +3,25 @@
 
 int main()
 {
-	//ProcessHelper::printAllProcesses();
+	ProcessHelper::printAllProcesses();
 	std::string str;
 	std::cin >> str;
-	DWORD processID;
-	//= ProcessHelper::findProcessID(str);
-	std::cin >> processID;
+	DWORD processID = ProcessHelper::findProcessID(str);
+	std::cout << "Process ID: " << processID << std::endl;
 	HANDLE handle = ProcessHelper::getProcessHandle(processID);
 	//int baseAddress = ProcessHelper::getBaseAddress(handle);
-	std::cout << "Process ID: " << processID << std::endl;
+
 	
 	std::vector<MemoryPage> pageVec = ProcessHelper::getMemoryPages(handle);
 	std::cout << "44 ID: " << processID << std::endl;
-	for (auto i : pageVec)
+
+	for (auto &page : pageVec)
 	{
-		std::cout << i.baseAddress << std::endl;
+		ProcessHelper::readMemory(handle, page);
+		//for (auto m : page)
+		//{
+		//	std::cout << m << std::endl;
+		//}
 	}
 	std::cout << "Process ID: " << processID << std::endl;
 
