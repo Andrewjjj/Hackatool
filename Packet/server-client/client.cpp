@@ -32,26 +32,27 @@ int main(int argc, char *argv[]){
     
     string s;
     while(getline(cin, s)){
-        string timeAmount = s.substr(1);
+        // string timeAmount = s.substr(1);
         // We are sending hostname + Tx in the same buffer.
         // For example, if the machineName was ug00 and we want to do T100,
         // The buffer to send would look like: ug00|100.
         // If we are sending acknowledgement for Done, it would be: ug00|Done.
-        string msgToSend = hostNameToSend + "|" + timeAmount;
-        string doneStr = hostNameToSend + "|Done";
-        int timeAmountInt = stoi(timeAmount);
+        // string msgToSend = hostNameToSend + "|" + timeAmount;
+        // string doneStr = hostNameToSend + "|Done";
+        // int timeAmountInt = stoi(timeAmount);
+        printf("Sending %s\n", s.c_str());
         char c = s[0];
 
         // Check if it is sleep. If it is, sleep then skip the cycle.
-        if(c == 'S'){
-            cout << "Sleep " + timeAmount + " units" << endl;
-            Sleep(timeAmountInt);
-            continue;
-        }        
+        // if(c == 'S'){
+        //     cout << "Sleep " + timeAmount + " units" << endl;
+        //     Sleep(timeAmountInt);
+        //     continue;
+        // }        
 
         // Setting up message sending to server.
         char msgToSendBuf[1024];
-        strcpy(msgToSendBuf, msgToSend.c_str());
+        strcpy(msgToSendBuf, s.c_str());
 
         // Create socket
         int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -74,24 +75,25 @@ int main(int argc, char *argv[]){
         }
 
         // print "Sending" and sends it to the server and increase the total transaction count.
-        totalTransactions++;
-        cout << getCurrentTimeString() << ": Send (T" << timeAmount << ")" << endl;
-        write(fd, msgToSendBuf, sizeof(msgToSendBuf));
+        // totalTransactions++;
+        // cout << getCurrentTimeString() << ": Send (T" << timeAmount << ")" << endl;
+        cout << "Size: " << sizeof(s) << endl;
+        write(fd, msgToSendBuf, s.length());
 
         // Receiving the "Done #" from server and store it in a string
-        string doneNumber;
-        char buffer[1024];
-        if(recv(fd, buffer, 1000, 0) < 0)
-		{
-			puts("recv failed");
-			break;
-		}
-        doneNumber = buffer;
+        // string doneNumber;
+        // char buffer[1024];
+        // if(recv(fd, buffer, 1000, 0) < 0)
+		// {
+		// 	puts("recv failed");
+		// 	break;
+		// }
+        // doneNumber = buffer;
         // Print "Done", receive "Done" from the server, send acknowledgement to server then close the connection.
-        cout << getCurrentTimeString() << ": Recv (D" << doneNumber << ")" << endl;
-        char doneBuf[1024];
-        strcpy(doneBuf, doneStr.c_str());
-        write(fd, doneBuf, sizeof(doneBuf));
+        // cout << getCurrentTimeString() << ": Recv (D" << doneNumber << ")" << endl;
+        // char doneBuf[1024];
+        // strcpy(doneBuf, doneStr.c_str());
+        // write(fd, doneBuf, sizeof(doneBuf));
         close(fd);
         fflush(stdout);
     }

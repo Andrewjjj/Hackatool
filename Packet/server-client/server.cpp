@@ -1,4 +1,5 @@
 #include "server.h"
+#include "../packetHelper.h"
 
 using namespace std;
 
@@ -57,16 +58,16 @@ int main(int argc, char *argv[]){
         timeout.tv_sec = TIMEOUT;
 
         // Checking for timeout
-        rv = select(fd + 1, &set, NULL, NULL, &timeout);
-        if(rv == -1){ // Something went wrong
-            cout << "RV Timeout Error" << endl;
-            return -1;
-        }
-        else if (rv == 0){ // Timeouts
-            cout << "Timeout" << endl;
-            break;
-        }
-        else{ // Normal routine if something is incoming from the client
+        // rv = select(fd + 1, &set, NULL, NULL, &timeout);
+        // if(rv == -1){ // Something went wrong
+        //     cout << "RV Timeout Error" << endl;
+        //     return -1;
+        // }
+        // else if (rv == 0){ // Timeouts
+        //     cout << "Timeout" << endl;
+        //     break;
+        // }
+        // else{ // Normal routine if something is incoming from the client
         
             // Accepts the client to connect to the server 
             client_fd = accept(fd, (struct sockaddr*)&client_address, (socklen_t*)&len); 
@@ -80,55 +81,59 @@ int main(int argc, char *argv[]){
             // Client sends the message with the following format: client_name|TNumber.
             // Hence, we find '|', split it into 2. client name and the seconds we need to process Trans
             // However, Client might send Tx or Done, so we will check that as well.
-            while((readSize = recv(client_fd, buffer, sizeof(buffer), 0)) > 0){
-                msg = buffer; // Store the message in string
-                size_t pos = msg.find("|"); // Find the position to split
-                hostName = msg.substr(0,pos); // Split the first half
-                string transValue = msg.substr(pos+1); // Split the second half
-                if(transValue == "Done"){
-                    gettimeofday(&lastTime, NULL); // Continuously update our time for the summary calculation
-                    cout << getCurrentTimeString() << ": # " << doneCount << " (Done) from " << hostName << endl; // Prints
-                    transactionCount[hostName]++;
-                    doneCount++;
-                    break;
-                }
-                else{
-                    // Stores the very first transaction for the summary calculation
-                    if(!firstTimeBool){
-                        gettimeofday(&firstTime, NULL);
-                        firstTimeBool = true;
-                    }
-                    gettimeofday(&lastTime, NULL);
-                    cout << getCurrentTimeString() << ": # " << doneCount << " (T " << transValue << ") from " << hostName << endl;
-                    Trans(stoi(transValue));
+            readSize = recv(client_fd, &buffer, sizeof(buffer), 0);
+            while(readSize > 0){
+                printf("RECV: %d bytes\n", readSize);
+                dump(buffer, readSize);
+                readSize = recv(client_fd, &buffer, sizeof(buffer), 0);
+                // msg = buffer; // Store the message in string
+                // size_t pos = msg.find("|"); // Find the position to split
+                // hostName = msg.substr(0,pos); // Split the first half
+                // string transValue = msg.substr(pos+1); // Split the second half
+                // if(transValue == "Done"){
+                //     gettimeofday(&lastTime, NULL); // Continuously update our time for the summary calculation
+                //     cout << getCurrentTimeString() << ": # " << doneCount << " (Done) from " << hostName << endl; // Prints
+                //     transactionCount[hostName]++;
+                //     doneCount++;
+                //     break;
+                // }
+                // else{
+                //     // Stores the very first transaction for the summary calculation
+                //     if(!firstTimeBool){
+                //         gettimeofday(&firstTime, NULL);
+                //         firstTimeBool = true;
+                //     }
+                //     gettimeofday(&lastTime, NULL);
+                //     cout << getCurrentTimeString() << ": # " << doneCount << " (T " << transValue << ") from " << hostName << endl;
+                //     Trans(stoi(transValue));
 
-                    // Sending the done #. 1,2,3........
-                    char msgToSend[1024];
-                    strcpy(msgToSend, to_string(doneCount).c_str());
-                    write(client_fd, msgToSend, sizeof(msgToSend));
-                }
+                //     // Sending the done #. 1,2,3........
+                //     char msgToSend[1024];
+                //     strcpy(msgToSend, to_string(doneCount).c_str());
+                //     write(client_fd, msgToSend, sizeof(msgToSend));
+                // }
             }     
             if(readSize == 0){
                 fflush(stdout);
             }   
             close(client_fd);
-        }
+        // }
         if(client_fd < 0) continue;
         
     }
-    cout << endl;
+    cout << "End" << endl;
     // Print Summary
-    cout << "SUMMARY " << endl;
-    // Iterating through transactions and counting the transactions for each of the client names.
-    int totalTransactions = 0;
-    for(auto t: transactionCount){
-        totalTransactions += t.second;
-        cout << t.second << " transactions from " << t.first << endl;
-    }
-    // Parsing time for result
-    long double totalTime = 
-        (lastTime.tv_sec + (lastTime.tv_usec / 1000000.0)) 
-        - (firstTime.tv_sec + (firstTime.tv_usec / 1000000.0));
-    cout << (long double)totalTransactions / totalTime << " transactions/sec (" << totalTransactions << "/" << totalTime << ")" << endl;
+    // cout << "SUMMARY " << endl;
+    // // Iterating through transactions and counting the transactions for each of the client names.
+    // int totalTransactions = 0;
+    // for(auto t: transactionCount){
+    //     totalTransactions += t.second;
+    //     cout << t.second << " transactions from " << t.first << endl;
+    // }
+    // // Parsing time for result
+    // long double totalTime = 
+    //     (lastTime.tv_sec + (lastTime.tv_usec / 1000000.0)) 
+    //     - (firstTime.tv_sec + (firstTime.tv_usec / 1000000.0));
+    // cout << (long double)totalTransactions / totalTime << " transactions/sec (" << totalTransactions << "/" << totalTime << ")" << endl;
     return 0;
 }
