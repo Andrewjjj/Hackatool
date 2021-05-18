@@ -1,16 +1,1 @@
-CMPUT 379 Assignment 3.
 
-To Make:
-- Running "make" or "make optimize" will compile it with -O (optimize) flag.
-- Running "make assign3" will make it without -O flag
-- Running "make debug" will make it with -g flag
-
-- make will produce both server and the client.
-
-File Descriptions:
-client.cpp / client.h -> Client source files
-server.cpp / server.h -> Server source files
-client.pdf / server.pdf -> pdf version of MAN page for client and server
-client.man / server.man -> man source files for client and server
-Makefile -> Makefile
-tands.c -> File for Trans and Sleep
